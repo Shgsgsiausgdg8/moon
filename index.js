@@ -13,16 +13,25 @@ app.get("/render", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath:
+        process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome"
     });
 
     const page = await browser.newPage();
-    await page.goto(targetUrl, { waitUntil: "networkidle2", timeout: 60000 });
 
-    // گرفتن HTML
+    // اگه خواستی هدر مرورگر واقعی بزاری
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+      "(KHTML, like Gecko) Chrome/118.0.5993.90 Safari/537.36"
+    );
+
+    await page.goto(targetUrl, {
+      waitUntil: "networkidle2",
+      timeout: 60000
+    });
+
     const html = await page.content();
-
-    // گرفتن کوکی‌ها
     const cookies = await page.cookies();
 
     await browser.close();
